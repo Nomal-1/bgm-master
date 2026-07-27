@@ -6,6 +6,8 @@
   "BGM_MASTER.NoActiveScene": "활성화된 장면 없음",
   "BGM_MASTER.Playlist": "플레이리스트",
   "BGM_MASTER.Track": "트랙",
+  "BGM_MASTER.Random": "랜덤 재생 (플레이리스트 전체)",
+  "BGM_MASTER.RandomPending": "재생 시작 시 무작위로 선곡됩니다",
   "BGM_MASTER.Volume": "음량",
   "BGM_MASTER.SelectHint": "재생할 플레이리스트와 트랙을 선택하세요."
 }

@@ -28,10 +28,14 @@
     <label>{{localize "BGM_MASTER.Track"}}</label>
     <select name="sound" {{#unless hasPlaylist}}disabled{{/unless}}>
       <option value="">-</option>
+      <option value="__random__" {{#if isRandom}}selected{{/if}}>🔀 {{localize "BGM_MASTER.Random"}}</option>
       {{#each sounds}}
         <option value="{{this.id}}" {{#if this.selected}}selected{{/if}}>{{this.name}}</option>
       {{/each}}
     </select>
+    {{#if isRandom}}
+      <p class="bgm-master-current-random">🎵 {{#if currentRandomName}}{{currentRandomName}}{{else}}{{localize "BGM_MASTER.RandomPending"}}{{/if}}</p>
+    {{/if}}
   </div>
 
   <div class="bgm-master-field">

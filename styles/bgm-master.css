@@ -141,6 +141,13 @@
   height: 4px;
 }
 
+.bgm-master-current-random {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: #b9b9c2;
+  font-style: italic;
+}
+
 .bgm-master-hint {
   margin: 0;
   font-size: 11px;

@@ -1,9 +1,11 @@
 const MODULE_ID = "bgm-master";
+const RANDOM_VALUE = "__random__";
 
 const SETTINGS = {
   ENABLED: "overrideEnabled",
   PLAYLIST: "overridePlaylistId",
   SOUND: "overrideSoundId",
+  CURRENT_RANDOM: "overrideCurrentRandomId",
   VOLUME: "overrideVolume",
   POSITION: "remotePosition"
 };
@@ -12,11 +14,32 @@ const SETTINGS = {
 /*  Playback helpers                             */
 /* -------------------------------------------- */
 
+// Set to true while we intentionally stop the override sound ourselves, so the
+// "auto-advance to another random track" listener doesn't also fire for it.
+let autoAdvanceGuard = false;
+
+function isRandomMode() {
+  return game.settings.get(MODULE_ID, SETTINGS.SOUND) === RANDOM_VALUE;
+}
+
+function pickRandomSound(playlist, excludeId) {
+  const all = playlist.sounds.contents;
+  const pool = excludeId ? all.filter((s) => s.id !== excludeId) : all;
+  const candidates = pool.length ? pool : all;
+  return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
 function getOverrideDocs() {
   const playlistId = game.settings.get(MODULE_ID, SETTINGS.PLAYLIST);
-  const soundId = game.settings.get(MODULE_ID, SETTINGS.SOUND);
   const playlist = playlistId ? game.playlists.get(playlistId) : null;
-  const sound = playlist && soundId ? playlist.sounds.get(soundId) : null;
+  if (!playlist) return { playlist: null, sound: null };
+  if (isRandomMode()) {
+    const currentId = game.settings.get(MODULE_ID, SETTINGS.CURRENT_RANDOM);
+    const sound = currentId ? playlist.sounds.get(currentId) : null;
+    return { playlist, sound };
+  }
+  const soundId = game.settings.get(MODULE_ID, SETTINGS.SOUND);
+  const sound = soundId ? playlist.sounds.get(soundId) : null;
   return { playlist, sound };
 }
 
@@ -37,15 +60,42 @@ async function resumeSceneAmbience(scene) {
 }
 
 async function playOverride() {
-  const { playlist, sound } = getOverrideDocs();
-  if (!playlist || !sound) return;
+  const playlistId = game.settings.get(MODULE_ID, SETTINGS.PLAYLIST);
+  const playlist = playlistId ? game.playlists.get(playlistId) : null;
+  if (!playlist || !playlist.sounds.size) return;
+
+  if (isRandomMode()) {
+    const pick = pickRandomSound(playlist);
+    await game.settings.set(MODULE_ID, SETTINGS.CURRENT_RANDOM, pick.id);
+    if (!pick.playing) await playlist.playSound(pick);
+    return;
+  }
+
+  const soundId = game.settings.get(MODULE_ID, SETTINGS.SOUND);
+  const sound = soundId ? playlist.sounds.get(soundId) : null;
+  if (!sound) return;
   if (!sound.playing) await playlist.playSound(sound);
+}
+
+async function playNextRandom() {
+  const playlistId = game.settings.get(MODULE_ID, SETTINGS.PLAYLIST);
+  const playlist = playlistId ? game.playlists.get(playlistId) : null;
+  if (!playlist || !playlist.sounds.size) return;
+  const currentId = game.settings.get(MODULE_ID, SETTINGS.CURRENT_RANDOM);
+  const pick = pickRandomSound(playlist, currentId);
+  await game.settings.set(MODULE_ID, SETTINGS.CURRENT_RANDOM, pick.id);
+  await playlist.playSound(pick);
 }
 
 async function stopOverride() {
   const { playlist, sound } = getOverrideDocs();
   if (!playlist || !sound) return;
-  if (sound.playing) await playlist.stopSound(sound);
+  autoAdvanceGuard = true;
+  try {
+    if (sound.playing) await playlist.stopSound(sound);
+  } finally {
+    autoAdvanceGuard = false;
+  }
 }
 
 async function setOverrideEnabled(enabled) {
@@ -104,25 +154,30 @@ class BGMMasterRemote extends HandlebarsApplicationMixin(ApplicationV2) {
     const soundId = game.settings.get(MODULE_ID, SETTINGS.SOUND);
     const volume = game.settings.get(MODULE_ID, SETTINGS.VOLUME);
     const playlist = playlistId ? game.playlists.get(playlistId) : null;
+    const isRandom = soundId === RANDOM_VALUE;
 
     const playlists = game.playlists.contents
       .map((p) => ({ id: p.id, name: p.name, selected: p.id === playlistId }))
       .sort((a, b) => a.name.localeCompare(b.name));
 
     const sounds = playlist
-      ? playlist.sounds
-          .map((s) => ({ id: s.id, name: s.name, selected: s.id === soundId }))
+      ? playlist.sounds.contents
+          .map((s) => ({ id: s.id, name: s.name, selected: !isRandom && s.id === soundId }))
           .sort((a, b) => a.name.localeCompare(b.name))
       : [];
 
     const activeScene = game.scenes.active;
+    const currentRandomId = game.settings.get(MODULE_ID, SETTINGS.CURRENT_RANDOM);
+    const currentRandomName = isRandom ? playlist?.sounds.get(currentRandomId)?.name ?? null : null;
 
     return {
       enabled,
       playlists,
       sounds,
+      isRandom,
+      currentRandomName,
       hasPlaylist: !!playlist,
-      hasSelection: !!(playlist && soundId && playlist.sounds.get(soundId)),
+      hasSelection: !!(playlist && ((isRandom && playlist.sounds.size) || (soundId && playlist.sounds.get(soundId)))),
       volume: Math.round(volume * 100),
       sceneName: activeScene?.name ?? game.i18n.localize("BGM_MASTER.NoActiveScene")
     };
@@ -206,6 +261,12 @@ Hooks.once("init", () => {
     type: String,
     default: ""
   });
+  game.settings.register(MODULE_ID, SETTINGS.CURRENT_RANDOM, {
+    scope: "world",
+    config: false,
+    type: String,
+    default: ""
+  });
   game.settings.register(MODULE_ID, SETTINGS.VOLUME, {
     scope: "world",
     config: false,
@@ -231,6 +292,19 @@ Hooks.once("ready", async () => {
     const { sound } = getOverrideDocs();
     if (sound && !sound.playing) await playOverride();
   }
+});
+
+// While the override is set to random/shuffle playback, chain to another
+// random track from the same playlist whenever the current one finishes on its own.
+Hooks.on("updatePlaylistSound", async (sound, changes) => {
+  if (!game.user.isGM) return;
+  if (autoAdvanceGuard) return;
+  if (!("playing" in changes) || changes.playing !== false) return;
+  if (!game.settings.get(MODULE_ID, SETTINGS.ENABLED)) return;
+  if (!isRandomMode()) return;
+  const currentId = game.settings.get(MODULE_ID, SETTINGS.CURRENT_RANDOM);
+  if (sound.id !== currentId) return;
+  await playNextRandom();
 });
 
 Hooks.on("updateSetting", (setting) => {
