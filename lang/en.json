@@ -1,0 +1,11 @@
+{
+  "BGM_MASTER.RemoteTitle": "BGM Master",
+  "BGM_MASTER.OpenRemote": "Open BGM Master Remote",
+  "BGM_MASTER.StatusOn": "Playing GM-selected BGM",
+  "BGM_MASTER.StatusOff": "Playing scene's default BGM",
+  "BGM_MASTER.NoActiveScene": "No active scene",
+  "BGM_MASTER.Playlist": "Playlist",
+  "BGM_MASTER.Track": "Track",
+  "BGM_MASTER.Volume": "Volume",
+  "BGM_MASTER.SelectHint": "Select a playlist and track to play."
+}

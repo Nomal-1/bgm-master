@@ -1,0 +1,110 @@
+.bgm-master-remote .window-content {
+  background: rgba(20, 20, 24, 0.92);
+  color: #f0f0f0;
+  padding: 0;
+}
+
+.bgm-master-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px 12px;
+}
+
+.bgm-master-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-align: center;
+  justify-content: center;
+}
+
+.bgm-master-status.off {
+  color: #9db4c0;
+  background: rgba(120, 150, 170, 0.15);
+}
+
+.bgm-master-status.on {
+  color: #ffd27a;
+  background: rgba(255, 170, 40, 0.18);
+}
+
+.bgm-master-switch {
+  align-self: center;
+  position: relative;
+  display: inline-block;
+  width: 64px;
+  height: 32px;
+}
+
+.bgm-master-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.bgm-master-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #4a4a52;
+  transition: 0.2s;
+  border-radius: 32px;
+}
+
+.bgm-master-slider::before {
+  position: absolute;
+  content: "";
+  height: 24px;
+  width: 24px;
+  left: 4px;
+  bottom: 4px;
+  background-color: #f0f0f0;
+  transition: 0.2s;
+  border-radius: 50%;
+}
+
+.bgm-master-switch input:checked + .bgm-master-slider {
+  background-color: #d98c1f;
+}
+
+.bgm-master-switch input:checked + .bgm-master-slider::before {
+  transform: translateX(32px);
+}
+
+.bgm-master-scene {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #b9b9c2;
+  justify-content: center;
+}
+
+.bgm-master-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bgm-master-field label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #9a9aa6;
+}
+
+.bgm-master-field select,
+.bgm-master-field input[type="range"] {
+  width: 100%;
+}
+
+.bgm-master-hint {
+  margin: 0;
+  font-size: 11px;
+  color: #e0a94f;
+  text-align: center;
+}

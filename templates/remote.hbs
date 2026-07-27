@@ -1,0 +1,45 @@
+<div class="bgm-master-body">
+  <div class="bgm-master-status {{#if enabled}}on{{else}}off{{/if}}">
+    <i class="fa-solid {{#if enabled}}fa-tower-broadcast{{else}}fa-house-signal{{/if}}"></i>
+    <span>{{#if enabled}}{{localize "BGM_MASTER.StatusOn"}}{{else}}{{localize "BGM_MASTER.StatusOff"}}{{/if}}</span>
+  </div>
+
+  <label class="bgm-master-switch">
+    <input type="checkbox" data-action="toggle" {{#if enabled}}checked{{/if}}>
+    <span class="bgm-master-slider"></span>
+  </label>
+
+  <div class="bgm-master-scene">
+    <i class="fa-solid fa-map-location-dot"></i>
+    <span>{{sceneName}}</span>
+  </div>
+
+  <div class="bgm-master-field">
+    <label>{{localize "BGM_MASTER.Playlist"}}</label>
+    <select name="playlist">
+      <option value="">-</option>
+      {{#each playlists}}
+        <option value="{{this.id}}" {{#if this.selected}}selected{{/if}}>{{this.name}}</option>
+      {{/each}}
+    </select>
+  </div>
+
+  <div class="bgm-master-field">
+    <label>{{localize "BGM_MASTER.Track"}}</label>
+    <select name="sound" {{#unless hasPlaylist}}disabled{{/unless}}>
+      <option value="">-</option>
+      {{#each sounds}}
+        <option value="{{this.id}}" {{#if this.selected}}selected{{/if}}>{{this.name}}</option>
+      {{/each}}
+    </select>
+  </div>
+
+  <div class="bgm-master-field">
+    <label>{{localize "BGM_MASTER.Volume"}}</label>
+    <input type="range" name="volume" min="0" max="100" step="1" value="{{volume}}">
+  </div>
+
+  {{#unless hasSelection}}
+    <p class="bgm-master-hint">{{localize "BGM_MASTER.SelectHint"}}</p>
+  {{/unless}}
+</div>
