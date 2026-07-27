@@ -1,3 +1,7 @@
+.bgm-master-remote {
+  color-scheme: dark;
+}
+
 .bgm-master-remote .window-content {
   background: rgba(20, 20, 24, 0.92);
   color: #f0f0f0;
@@ -100,6 +104,41 @@
 .bgm-master-field select,
 .bgm-master-field input[type="range"] {
   width: 100%;
+  color: #f0f0f0;
+}
+
+.bgm-master-field select {
+  background-color: #26262b;
+  border: 1px solid #4a4a52;
+  border-radius: 4px;
+  padding: 4px 6px;
+}
+
+.bgm-master-field select:focus {
+  outline: none;
+  border-color: #d98c1f;
+}
+
+.bgm-master-field select option {
+  background-color: #26262b;
+  color: #f0f0f0;
+}
+
+.bgm-master-field input[type="range"] {
+  accent-color: #d98c1f;
+  background: transparent;
+}
+
+.bgm-master-field input[type="range"]::-webkit-slider-runnable-track {
+  background: #3a3a42;
+  border-radius: 4px;
+  height: 4px;
+}
+
+.bgm-master-field input[type="range"]::-moz-range-track {
+  background: #3a3a42;
+  border-radius: 4px;
+  height: 4px;
 }
 
 .bgm-master-hint {
