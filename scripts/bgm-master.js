@@ -250,20 +250,21 @@ Hooks.on("updateScene", async (scene, changes) => {
 
 Hooks.on("getSceneControlButtons", (controls) => {
   if (!game.user.isGM) return;
-  const group = controls.tokens;
+  // v12 passes an array of SceneControl groups (not the v13+ keyed object).
+  const group = controls.find((c) => c.name === "token");
   if (!group) return;
-  group.tools.bgmMaster = {
+  group.tools.push({
     name: "bgmMaster",
     title: "BGM_MASTER.OpenRemote",
     icon: "fa-solid fa-music",
-    order: Object.keys(group.tools).length,
+    visible: true,
     button: true,
-    onChange: () => {
+    onClick: () => {
       const app = game.bgmMaster;
       if (!app) return;
       if (app.minimized) app.maximize();
       if (app.rendered) app.bringToTop();
       else app.render({ force: true });
     }
-  };
+  });
 });

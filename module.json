@@ -2,10 +2,10 @@
   "id": "bgm-master",
   "title": "BGM 마스터 (BGM Master)",
   "description": "마스터(GM)가 세션 도중 언제든지 배경음악을 자유롭게 전환할 수 있는 플로팅 리모컨을 제공합니다. 리모컨을 끄면 현재 장면에 설정된 기본 앰비언스 BGM으로 자동 복귀합니다.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "compatibility": {
-    "minimum": "13",
-    "verified": "14"
+    "minimum": "12",
+    "verified": "12.331"
   },
   "authors": [
     {
