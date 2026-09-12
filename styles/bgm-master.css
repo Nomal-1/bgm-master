@@ -141,6 +141,58 @@
   height: 4px;
 }
 
+.bgm-master-track-row {
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+}
+
+.bgm-master-track-row select {
+  flex: 1;
+  min-width: 0;
+}
+
+.bgm-master-fav-btn {
+  flex: 0 0 auto;
+  width: 30px;
+  background-color: #26262b;
+  border: 1px solid #4a4a52;
+  border-radius: 4px;
+  color: #6a6a72;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bgm-master-fav-btn:hover {
+  border-color: #d98c1f;
+  color: #e0a94f;
+}
+
+.bgm-master-fav-btn.active {
+  color: #ffd27a;
+}
+
+.bgm-master-fav-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.bgm-master-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #b9b9c2;
+  margin-top: 2px;
+  cursor: pointer;
+}
+
+.bgm-master-checkbox input {
+  accent-color: #d98c1f;
+}
+
 .bgm-master-current-random {
   margin: 2px 0 0;
   font-size: 11px;
