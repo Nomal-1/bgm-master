@@ -239,8 +239,11 @@ class BGMMasterRemote extends HandlebarsApplicationMixin(ApplicationV2) {
   async #onSelectPlaylist(event) {
     const wasEnabled = game.settings.get(MODULE_ID, SETTINGS.ENABLED);
     if (wasEnabled) await stopOverride();
-    await game.settings.set(MODULE_ID, SETTINGS.PLAYLIST, event.currentTarget.value);
-    await game.settings.set(MODULE_ID, SETTINGS.SOUND, "");
+    const playlistId = event.currentTarget.value;
+    await game.settings.set(MODULE_ID, SETTINGS.PLAYLIST, playlistId);
+    // Default a newly picked playlist to random/shuffle playback rather than "no track selected".
+    await game.settings.set(MODULE_ID, SETTINGS.SOUND, playlistId ? RANDOM_VALUE : "");
+    if (wasEnabled && playlistId) await playOverride();
     this.render();
   }
 
