@@ -8,34 +8,29 @@ const SETTINGS = {
   CURRENT_RANDOM: "overrideCurrentRandomId",
   VOLUME: "overrideVolume",
   POSITION: "remotePosition",
-  FAVORITES: "favoriteTracks",
-  FAVORITES_ONLY: "favoritesOnly"
+  FAVORITE_PLAYLISTS: "favoritePlaylists",
+  FAVORITE_PLAYLISTS_ONLY: "favoritePlaylistsOnly"
 };
 
 /* -------------------------------------------- */
 /*  Favorites                                    */
 /* -------------------------------------------- */
 
-function favoriteKey(playlistId, soundId) {
-  return `${playlistId}:${soundId}`;
+function getFavoritePlaylists() {
+  return game.settings.get(MODULE_ID, SETTINGS.FAVORITE_PLAYLISTS) ?? {};
 }
 
-function getFavorites() {
-  return game.settings.get(MODULE_ID, SETTINGS.FAVORITES) ?? {};
+function isFavoritePlaylist(playlistId) {
+  if (!playlistId) return false;
+  return !!getFavoritePlaylists()[playlistId];
 }
 
-function isFavoriteTrack(playlistId, soundId) {
-  if (!playlistId || !soundId) return false;
-  return !!getFavorites()[favoriteKey(playlistId, soundId)];
-}
-
-async function toggleFavoriteTrack(playlistId, soundId) {
-  if (!playlistId || !soundId) return;
-  const favorites = foundry.utils.deepClone(getFavorites());
-  const key = favoriteKey(playlistId, soundId);
-  if (favorites[key]) delete favorites[key];
-  else favorites[key] = true;
-  await game.settings.set(MODULE_ID, SETTINGS.FAVORITES, favorites);
+async function toggleFavoritePlaylist(playlistId) {
+  if (!playlistId) return;
+  const favorites = foundry.utils.deepClone(getFavoritePlaylists());
+  if (favorites[playlistId]) delete favorites[playlistId];
+  else favorites[playlistId] = true;
+  await game.settings.set(MODULE_ID, SETTINGS.FAVORITE_PLAYLISTS, favorites);
 }
 
 /* -------------------------------------------- */
@@ -181,38 +176,32 @@ class BGMMasterRemote extends HandlebarsApplicationMixin(ApplicationV2) {
     const playlistId = game.settings.get(MODULE_ID, SETTINGS.PLAYLIST);
     const soundId = game.settings.get(MODULE_ID, SETTINGS.SOUND);
     const volume = game.settings.get(MODULE_ID, SETTINGS.VOLUME);
-    const favoritesOnly = game.settings.get(MODULE_ID, SETTINGS.FAVORITES_ONLY);
+    const favoritePlaylistsOnly = game.settings.get(MODULE_ID, SETTINGS.FAVORITE_PLAYLISTS_ONLY);
     const playlist = playlistId ? game.playlists.get(playlistId) : null;
     const isRandom = soundId === RANDOM_VALUE;
 
-    const playlists = game.playlists.contents
-      .map((p) => ({ id: p.id, name: p.name, selected: p.id === playlistId }))
+    let playlists = game.playlists.contents
+      .map((p) => ({ id: p.id, name: p.name, selected: p.id === playlistId, favorite: isFavoritePlaylist(p.id) }))
       .sort((a, b) => a.name.localeCompare(b.name));
 
-    let sounds = playlist
-      ? playlist.sounds.contents
-          .map((s) => ({
-            id: s.id,
-            name: s.name,
-            selected: !isRandom && s.id === soundId,
-            favorite: isFavoriteTrack(playlistId, s.id)
-          }))
-          .sort((a, b) => a.name.localeCompare(b.name))
-      : [];
-
-    if (favoritesOnly) {
-      const filtered = sounds.filter((s) => s.favorite);
-      if (!filtered.some((s) => s.selected)) {
-        const current = sounds.find((s) => s.selected);
+    if (favoritePlaylistsOnly) {
+      const filtered = playlists.filter((p) => p.favorite);
+      if (!filtered.some((p) => p.selected)) {
+        const current = playlists.find((p) => p.selected);
         if (current) filtered.unshift(current);
       }
-      sounds = filtered;
+      playlists = filtered;
     }
+
+    const sounds = playlist
+      ? playlist.sounds.contents
+          .map((s) => ({ id: s.id, name: s.name, selected: !isRandom && s.id === soundId }))
+          .sort((a, b) => a.name.localeCompare(b.name))
+      : [];
 
     const activeScene = game.scenes.active;
     const currentRandomId = game.settings.get(MODULE_ID, SETTINGS.CURRENT_RANDOM);
     const currentRandomName = isRandom ? playlist?.sounds.get(currentRandomId)?.name ?? null : null;
-    const canFavorite = !!(playlist && soundId && !isRandom);
 
     return {
       enabled,
@@ -220,9 +209,9 @@ class BGMMasterRemote extends HandlebarsApplicationMixin(ApplicationV2) {
       sounds,
       isRandom,
       currentRandomName,
-      favoritesOnly,
-      canFavorite,
-      currentIsFavorite: canFavorite && isFavoriteTrack(playlistId, soundId),
+      favoritePlaylistsOnly,
+      currentPlaylistIsFavorite: !!playlist && isFavoritePlaylist(playlistId),
+      canFavoritePlaylist: !!playlist,
       hasPlaylist: !!playlist,
       hasSelection: !!(playlist && ((isRandom && playlist.sounds.size) || (soundId && playlist.sounds.get(soundId)))),
       volume: Math.round(volume * 100),
@@ -237,8 +226,8 @@ class BGMMasterRemote extends HandlebarsApplicationMixin(ApplicationV2) {
     el.querySelector('[name="playlist"]')?.addEventListener("change", this.#onSelectPlaylist.bind(this));
     el.querySelector('[name="sound"]')?.addEventListener("change", this.#onSelectSound.bind(this));
     el.querySelector('[name="volume"]')?.addEventListener("input", this.#onVolumeChange.bind(this));
-    el.querySelector('[data-action="toggleFavorite"]')?.addEventListener("click", this.#onToggleFavorite.bind(this));
-    el.querySelector('[name="favoritesOnly"]')?.addEventListener("change", this.#onToggleFavoritesOnly.bind(this));
+    el.querySelector('[data-action="togglePlaylistFavorite"]')?.addEventListener("click", this.#onTogglePlaylistFavorite.bind(this));
+    el.querySelector('[name="favoritePlaylistsOnly"]')?.addEventListener("change", this.#onToggleFavoritePlaylistsOnly.bind(this));
   }
 
   async #onToggle(event) {
@@ -263,16 +252,15 @@ class BGMMasterRemote extends HandlebarsApplicationMixin(ApplicationV2) {
     this.render();
   }
 
-  async #onToggleFavorite() {
+  async #onTogglePlaylistFavorite() {
     const playlistId = game.settings.get(MODULE_ID, SETTINGS.PLAYLIST);
-    const soundId = game.settings.get(MODULE_ID, SETTINGS.SOUND);
-    if (!playlistId || !soundId || soundId === RANDOM_VALUE) return;
-    await toggleFavoriteTrack(playlistId, soundId);
+    if (!playlistId) return;
+    await toggleFavoritePlaylist(playlistId);
     this.render();
   }
 
-  async #onToggleFavoritesOnly(event) {
-    await game.settings.set(MODULE_ID, SETTINGS.FAVORITES_ONLY, event.currentTarget.checked);
+  async #onToggleFavoritePlaylistsOnly(event) {
+    await game.settings.set(MODULE_ID, SETTINGS.FAVORITE_PLAYLISTS_ONLY, event.currentTarget.checked);
     this.render();
   }
 
@@ -341,13 +329,13 @@ Hooks.once("init", () => {
     type: Object,
     default: { left: 120, top: 120, width: 320, height: "auto" }
   });
-  game.settings.register(MODULE_ID, SETTINGS.FAVORITES, {
+  game.settings.register(MODULE_ID, SETTINGS.FAVORITE_PLAYLISTS, {
     scope: "client",
     config: false,
     type: Object,
     default: {}
   });
-  game.settings.register(MODULE_ID, SETTINGS.FAVORITES_ONLY, {
+  game.settings.register(MODULE_ID, SETTINGS.FAVORITE_PLAYLISTS_ONLY, {
     scope: "client",
     config: false,
     type: Boolean,

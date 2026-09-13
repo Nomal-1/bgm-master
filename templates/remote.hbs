@@ -16,32 +16,32 @@
 
   <div class="bgm-master-field">
     <label>{{localize "BGM_MASTER.Playlist"}}</label>
-    <select name="playlist">
-      <option value="">-</option>
-      {{#each playlists}}
-        <option value="{{this.id}}" {{#if this.selected}}selected{{/if}}>{{this.name}}</option>
-      {{/each}}
-    </select>
-  </div>
-
-  <div class="bgm-master-field">
-    <label>{{localize "BGM_MASTER.Track"}}</label>
     <div class="bgm-master-track-row">
-      <select name="sound" {{#unless hasPlaylist}}disabled{{/unless}}>
+      <select name="playlist">
         <option value="">-</option>
-        <option value="__random__" {{#if isRandom}}selected{{/if}}>🔀 {{localize "BGM_MASTER.Random"}}</option>
-        {{#each sounds}}
+        {{#each playlists}}
           <option value="{{this.id}}" {{#if this.selected}}selected{{/if}}>{{#if this.favorite}}⭐ {{/if}}{{this.name}}</option>
         {{/each}}
       </select>
-      <button type="button" data-action="toggleFavorite" class="bgm-master-fav-btn {{#if currentIsFavorite}}active{{/if}}" {{#unless canFavorite}}disabled{{/unless}} title="{{localize 'BGM_MASTER.ToggleFavorite'}}">
+      <button type="button" data-action="togglePlaylistFavorite" class="bgm-master-fav-btn {{#if currentPlaylistIsFavorite}}active{{/if}}" {{#unless canFavoritePlaylist}}disabled{{/unless}} title="{{localize 'BGM_MASTER.TogglePlaylistFavorite'}}">
         <i class="fa-solid fa-star"></i>
       </button>
     </div>
     <label class="bgm-master-checkbox">
-      <input type="checkbox" name="favoritesOnly" {{#if favoritesOnly}}checked{{/if}}>
-      <span>{{localize "BGM_MASTER.FavoritesOnly"}}</span>
+      <input type="checkbox" name="favoritePlaylistsOnly" {{#if favoritePlaylistsOnly}}checked{{/if}}>
+      <span>{{localize "BGM_MASTER.FavoritePlaylistsOnly"}}</span>
     </label>
+  </div>
+
+  <div class="bgm-master-field">
+    <label>{{localize "BGM_MASTER.Track"}}</label>
+    <select name="sound" {{#unless hasPlaylist}}disabled{{/unless}}>
+      <option value="">-</option>
+      <option value="__random__" {{#if isRandom}}selected{{/if}}>🔀 {{localize "BGM_MASTER.Random"}}</option>
+      {{#each sounds}}
+        <option value="{{this.id}}" {{#if this.selected}}selected{{/if}}>{{this.name}}</option>
+      {{/each}}
+    </select>
     {{#if isRandom}}
       <p class="bgm-master-current-random">🎵 {{#if currentRandomName}}{{currentRandomName}}{{else}}{{localize "BGM_MASTER.RandomPending"}}{{/if}}</p>
     {{/if}}
