@@ -389,21 +389,34 @@ Hooks.on("updateScene", async (scene, changes) => {
 
 Hooks.on("getSceneControlButtons", (controls) => {
   if (!game.user.isGM) return;
-  // v12 passes an array of SceneControl groups (not the v13+ keyed object).
-  const group = controls.find((c) => c.name === "token");
-  if (!group) return;
-  group.tools.push({
+
+  const openRemote = () => {
+    const app = game.bgmMaster;
+    if (!app) return;
+    if (app.minimized) app.maximize();
+    if (app.rendered) app.bringToTop();
+    else app.render({ force: true });
+  };
+
+  const tool = {
     name: "bgmMaster",
     title: "BGM_MASTER.OpenRemote",
     icon: "fa-solid fa-music",
     visible: true,
     button: true,
-    onClick: () => {
-      const app = game.bgmMaster;
-      if (!app) return;
-      if (app.minimized) app.maximize();
-      if (app.rendered) app.bringToTop();
-      else app.render({ force: true });
-    }
-  });
+    onClick: openRemote, // V12
+    onChange: openRemote // V13+
+  };
+
+  // V12는 SceneControl 그룹 배열을 넘기고, V13+는 이름을 키로 하는 객체(그룹 이름도
+  // "token" → "tokens", tools도 배열 → 객체)를 넘긴다.
+  if (Array.isArray(controls)) {
+    controls.find((c) => c.name === "token")?.tools.push(tool);
+    return;
+  }
+
+  const group = controls.tokens ?? controls.token;
+  if (!group) return;
+  tool.order = Object.keys(group.tools).length;
+  group.tools[tool.name] = tool;
 });
