@@ -1,3 +1,5 @@
+import { registerChatSound } from "./chat-sound.js";
+
 const MODULE_ID = "bgm-master";
 const RANDOM_VALUE = "__random__";
 
@@ -420,3 +422,5 @@ Hooks.on("getSceneControlButtons", (controls) => {
   tool.order = Object.keys(group.tools).length;
   group.tools[tool.name] = tool;
 });
+
+registerChatSound();

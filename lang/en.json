@@ -11,5 +11,11 @@
   "BGM_MASTER.TogglePlaylistFavorite": "Toggle favorite for the current playlist",
   "BGM_MASTER.FavoritePlaylistsOnly": "Show favorite playlists only",
   "BGM_MASTER.Volume": "Volume",
-  "BGM_MASTER.SelectHint": "Select a playlist and track to play."
+  "BGM_MASTER.SelectHint": "Select a playlist and track to play.",
+  "BGM_MASTER.ChatSound.PlaylistName": "Chat notification playlist",
+  "BGM_MASTER.ChatSound.PlaylistHint": "Plays a random sound from this playlist whenever a chat message arrives (type the playlist name; empty = off). Replaces the Bing Bong! module — while Bing Bong! is enabled this stays silent to avoid double sounds.",
+  "BGM_MASTER.ChatSound.RollPlaylistName": "Roll notification playlist",
+  "BGM_MASTER.ChatSound.RollPlaylistHint": "Playlist to play for dice roll messages (empty = off; the dice sound still plays).",
+  "BGM_MASTER.ChatSound.EnabledName": "Hear chat notifications",
+  "BGM_MASTER.ChatSound.EnabledHint": "Whether this browser plays the chat notification sound (each player can turn it off)."
 }

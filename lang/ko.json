@@ -11,5 +11,11 @@
   "BGM_MASTER.TogglePlaylistFavorite": "현재 플레이리스트 즐겨찾기 등록/해제",
   "BGM_MASTER.FavoritePlaylistsOnly": "즐겨찾기한 플레이리스트만 보기",
   "BGM_MASTER.Volume": "음량",
-  "BGM_MASTER.SelectHint": "재생할 플레이리스트와 트랙을 선택하세요."
+  "BGM_MASTER.SelectHint": "재생할 플레이리스트와 트랙을 선택하세요.",
+  "BGM_MASTER.ChatSound.PlaylistName": "채팅 알림음 플레이리스트",
+  "BGM_MASTER.ChatSound.PlaylistHint": "채팅 메시지가 올 때마다 이 플레이리스트에서 소리 하나를 무작위로 재생합니다(플레이리스트 이름을 그대로 입력, 비우면 끔). Bing Bong! 모듈을 대신합니다 — Bing Bong!이 켜져 있으면 겹치지 않게 울리지 않습니다.",
+  "BGM_MASTER.ChatSound.RollPlaylistName": "굴림 알림음 플레이리스트",
+  "BGM_MASTER.ChatSound.RollPlaylistHint": "주사위 굴림 메시지에 재생할 플레이리스트(비우면 끔, 주사위 소리는 그대로 납니다).",
+  "BGM_MASTER.ChatSound.EnabledName": "채팅 알림음 듣기",
+  "BGM_MASTER.ChatSound.EnabledHint": "이 브라우저에서 채팅 알림음을 들을지 정합니다(각자 끌 수 있음)."
 }
